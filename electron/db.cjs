@@ -94,7 +94,7 @@ CREATE INDEX IF NOT EXISTS idx_resp_session ON responses(session_id);
 
 const DEFAULT_TASKS = [
   { title: 'Allergen identification', instruction: 'Find whether the product contains peanuts.', answer_type: 'multiple_choice', options: ['Contains peanuts', 'May contain traces', 'No peanuts', 'Not stated'] },
-  { title: 'Sugar identification', instruction: 'Find the sugar content per serving.', answer_type: 'short_text', options: [] },
+  { title: 'Sugar identification', instruction: 'Find the sugar content per 100 g.', answer_type: 'short_text', options: [] },
   { title: 'Serving size', instruction: 'Identify the serving size mentioned on the package.', answer_type: 'short_text', options: [] },
   { title: 'Ingredient identification', instruction: 'Find the first ingredient listed.', answer_type: 'short_text', options: [] },
   { title: 'Sodium comparison', instruction: 'Identify which of the two products contains less sodium.', answer_type: 'multiple_choice', options: ['Product A', 'Product B', 'Same', 'Cannot tell'] },
@@ -169,7 +169,23 @@ function registerIpc(ipcMain, db, app) {
     packaging: db.all('SELECT * FROM packaging WHERE experiment_id=$id', { $id: eid }),
     tasks: db.all('SELECT * FROM tasks WHERE experiment_id=$id ORDER BY sort_order', { $id: eid }),
   }));
-  ipcMain.handle('exp:delete', (_e, eid) => { db.run('DELETE FROM experiments WHERE id=$id', { $id: eid }); });
+  ipcMain.handle('exp:delete', (_e, eid) => {
+    // Full cascade: study-material files, then every row tied to the experiment.
+    for (const row of db.all('SELECT image_path FROM packaging WHERE experiment_id=$id', { $id: eid })) {
+      if (row.image_path && fs.existsSync(row.image_path)) fs.unlinkSync(row.image_path);
+    }
+    const sessionIds = db.all('SELECT id FROM sessions WHERE experiment_id=$id', { $id: eid }).map(r => r.id);
+    for (const sid of sessionIds) {
+      db.run('DELETE FROM measurements WHERE session_id=$id', { $id: sid });
+      db.run('DELETE FROM responses WHERE session_id=$id', { $id: sid });
+      db.run('DELETE FROM baselines WHERE session_id=$id', { $id: sid });
+    }
+    db.run('DELETE FROM sessions WHERE experiment_id=$id', { $id: eid });
+    db.run('DELETE FROM participants WHERE id NOT IN (SELECT participant_id FROM sessions)');
+    db.run('DELETE FROM tasks WHERE experiment_id=$id', { $id: eid });
+    db.run('DELETE FROM packaging WHERE experiment_id=$id', { $id: eid });
+    db.run('DELETE FROM experiments WHERE id=$id', { $id: eid });
+  });
   ipcMain.handle('exp:defaults', () => DEFAULT_TASKS);
 
   ipcMain.handle('pack:add', (_e, { experimentId, variantName, dataUrl }) => {
