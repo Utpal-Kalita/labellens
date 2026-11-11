@@ -152,7 +152,7 @@ export default function Analytics() {
                   <td className="py-2"><Badge tone={s.status === 'completed' ? 'good' : 'neutral'}>{s.status}</Badge></td>
                   <td className="py-2 text-right">
                     <button className="text-xs text-red-500 hover:underline"
-                      onClick={async () => { if (confirm(`Delete all data for ${s.anonymous_code}? This cannot be undone.`)) { await api.deleteSessionData(s.id); const d = await api.experimentAnalytics(id); setSessions(d.sessions); setResponses(d.responses); } }}>
+                      onClick={async () => { if (confirm(`Delete all data for ${s.anonymous_code}? This cannot be undone.`)) { await api.deleteSessionData(s.id); if (selSession === s.id) { setSelSession(''); setSelResponse(''); setTimeline([]); setBaseline(null); } const d = await api.experimentAnalytics(id); setSessions(d.sessions); setResponses(d.responses); setMeasStats(d.measStats); } }}>
                       Delete data
                     </button>
                   </td>
