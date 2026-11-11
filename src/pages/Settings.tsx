@@ -23,10 +23,11 @@ export default function Settings() {
       <Card className="mb-6">
         <h2 className="font-semibold text-primary mb-2">Data handling</h2>
         <ul className="text-sm text-slate-600 space-y-1 list-disc list-inside">
-          <li>All research data lives in a local SQLite database on this machine.</li>
-          <li>No raw video, no facial images, no audio are recorded or stored.</li>
+          <li>All research data (sessions, responses, measurements, baselines) lives in a local SQLite database on this machine.</li>
+          <li>Participant camera frames are processed on-device by the SmartSpectra SDK; LabelLens never records or stores participant video, facial images, or audio.</li>
+          <li>Researcher-uploaded packaging design images are stored in the app data folder on this machine. They are study materials, not participant data.</li>
+          <li>SmartSpectra telemetry is disabled in this app (enableTelemetry=false). The SDK still contacts Presage's servers to authenticate the API key; see Presage's telemetry & privacy documentation and privacy policy.</li>
           <li>Participants can stop a session at any time; their data can be deleted from the experiment's Sessions table.</li>
-          <li>SmartSpectra processes camera frames to produce measurements; review Presage's telemetry documentation and disclose it in your research consent text.</li>
         </ul>
       </Card>
       <Card>

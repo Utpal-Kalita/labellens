@@ -4,8 +4,6 @@
 
 ---
 
-
-Report conversation
 Product Requirements Document (PRD)
 LabelLens — Human-Centred Food Packaging Research Platform
 
@@ -1074,11 +1072,3 @@ Get a live pulse measurement working using the official Electron starting point.
 Build one complete experiment: upload two nutritional labels, ask participants to find sugar content, record their answers and display the results.
 
 Do not build the entire PRD immediately. First prove the SDK integration and one complete research workflow. That is the foundation of the submission.
-
-If you want, I can:
-
-Outline detailed participant testing steps
-Describe integration approach for SmartSpectra SDK
-Expand on experiment analytics features
-
-ChatGPT is AI and can make mistakes.

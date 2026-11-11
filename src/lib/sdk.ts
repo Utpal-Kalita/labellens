@@ -48,6 +48,9 @@ export class LiveSmartSpectraSource implements SignalSource {
     const sdk = new rendererMod.SmartSpectraSDK({
       apiKey: this.apiKey,
       requestedMetrics: [...face, ...cardio],
+      // Privacy default: do not send Presage optional session summaries or
+      // device readiness diagnostics (SDK telemetry is opt-out, defaults on).
+      enableTelemetry: false,
     });
     this.sdk = sdk;
 

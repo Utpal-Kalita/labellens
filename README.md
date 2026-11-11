@@ -11,10 +11,16 @@ Built for the DEV **Presage SmartSpectra SDK Challenge** (#presagechallenge).
 - **Contactless measurement** — pulse rate, HRV, breathing, expressions and blinking from the live camera stream via SmartSpectra. No raw video, no facial images, and no audio are ever stored.
 - **Analytics** — descriptive statistics only: completion time (mean/median), answer accuracy, self-reported difficulty, pulse data availability, and per-session physiological timelines with baseline comparison.
 
+## Data flow
+
+- **Participant camera frames** are processed on-device by the SmartSpectra SDK. LabelLens never records, saves, or uploads participant video or face images. Only the derived measurements (pulse, HRV, breathing, expression/blink events), answers, and timings are stored.
+- **Research data** (experiments, sessions, responses, measurements, baselines) lives in a local SQLite database on the researcher's machine. Researcher-uploaded packaging images are stored locally in the app data folder as study materials.
+- **SmartSpectra service contact**: the SDK authenticates its API key against Presage's servers. Presage's optional SDK telemetry (session summaries and device readiness diagnostics) is disabled in this app (`enableTelemetry=false`). See Presage's telemetry & privacy documentation and privacy policy.
+
 ## Guardrails (by design)
 
-- Explicit, recorded consent before any camera use; participants can stop at any time and delete their data.
-- All data stays in a local SQLite database on the researcher's machine.
+- Explicit, recorded consent before any camera use, including the data-handling disclosure above; participants can stop at any time and delete their data.
+- All research data stays in a local SQLite database on the researcher's machine.
 - Descriptive statistics only. The app never claims a participant was confused, stressed, or preferred a design because a physiological value changed.
 - Not a medical device. Measurements are observational research data.
 - The simulated measurement source (for development without a camera) is visibly labeled everywhere and is never presented as a real measurement.

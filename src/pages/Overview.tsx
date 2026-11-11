@@ -16,7 +16,7 @@ export default function Overview() {
       <div className="grid grid-cols-3 gap-4 mb-8">
         <Stat label="Experiments" value={String(experiments.length)} />
         <Stat label="Completed sessions" value={String(completed)} />
-        <Stat label="Data storage" value="Local only" hint="SQLite on this machine; no raw video is ever stored" />
+        <Stat label="Data storage" value="On this machine" hint="Research data lives in local SQLite; participant camera is processed on-device and never recorded" />
       </div>
       <Card>
         <div className="flex items-center justify-between mb-4">

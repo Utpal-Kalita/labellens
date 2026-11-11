@@ -231,11 +231,11 @@ export default function SessionPage() {
                 <li>Facial-expression classifications and blinking</li>
                 <li>How long each task takes, your answers, and your difficulty ratings</li>
               </ul>
-              <p className="font-medium">What is NOT collected:</p>
+              <p className="font-medium">How your data is handled:</p>
               <ul className="list-disc list-inside space-y-1">
-                <li>No raw video is recorded or stored</li>
-                <li>No photos of your face are saved</li>
-                <li>Nothing is uploaded — research data stays in a local database on this machine</li>
+                <li>Your camera frames are processed on this computer by the SmartSpectra software. LabelLens never records, saves, or uploads video or photos of your face.</li>
+                <li>Only the resulting measurements (numbers such as pulse rate), your answers, and timings are saved, in a local database on this computer.</li>
+                <li>SmartSpectra contacts Presage's servers to verify its license key. Its optional usage telemetry is turned off in this app, so it does not send session summaries or device diagnostics.</li>
               </ul>
               <p>These measurements are observational research data. They are not medical readings and are never used to diagnose your emotions or health. You can stop at any time, and you can ask for your session data to be deleted.</p>
             </div>
