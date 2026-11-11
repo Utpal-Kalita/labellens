@@ -46,6 +46,8 @@ export default function Analytics() {
   }, [selSession, selResponse]);
 
   const completed = sessions.filter(s => s.status === 'completed');
+  // Aggregates exclude simulated rehearsals unless the labeled opt-in is on.
+  const aggSessions = includeSim ? sessions : sessions.filter(s => (s as any).mode !== 'simulated');
   const variants = useMemo(() => [...new Set(responses.map(r => r.variant_name).filter(Boolean))] as string[], [responses]);
 
   const variantStats = variants.map(v => {
@@ -92,7 +94,7 @@ export default function Analytics() {
         </div>
       )}
       <div className="grid grid-cols-4 gap-4 mb-8">
-        <Stat label="Sessions" value={String(sessions.length)} hint={`${completed.length} completed`} />
+        <Stat label="Sessions" value={String(aggSessions.length)} hint={`${aggSessions.filter(s => s.status === 'completed').length} completed`} />
         <Stat label="Avg completion" value={fmtMs(mean(responses.map(r => r.completion_time_ms).filter((x): x is number => x !== null)))} />
         <Stat label="Answer accuracy" value={pct((() => { const c = responses.filter(r => r.is_correct !== null); return c.length ? c.filter(r => r.is_correct === 1).length / c.length : null; })())} />
         <Stat label="Pulse data availability" value={availability === null ? '—' : pct(availability)} hint="Share of stored signal rows containing a pulse value" />
