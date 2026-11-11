@@ -49,7 +49,8 @@ CREATE TABLE IF NOT EXISTS sessions (
   variant_order TEXT DEFAULT '[]',
   start_time TEXT,
   end_time TEXT,
-  status TEXT DEFAULT 'started'
+  status TEXT DEFAULT 'started',
+  mode TEXT DEFAULT 'live'
 );
 CREATE TABLE IF NOT EXISTS responses (
   id TEXT PRIMARY KEY,
@@ -146,6 +147,7 @@ class DB {
 function id() { return crypto.randomUUID(); }
 
 function registerIpc(ipcMain, db, app) {
+  try { db.run("ALTER TABLE sessions ADD COLUMN mode TEXT DEFAULT 'live'"); } catch {}
   const packagingDir = path.join(app.getPath('userData'), 'packaging');
   fs.mkdirSync(packagingDir, { recursive: true });
 
@@ -226,7 +228,7 @@ function registerIpc(ipcMain, db, app) {
   });
   ipcMain.handle('task:delete', (_e, tid) => db.run('DELETE FROM tasks WHERE id=$id', { $id: tid }));
 
-  ipcMain.handle('session:start', (_e, { experimentId }) => {
+  ipcMain.handle('session:start', (_e, { experimentId, mode }) => {
     const variants = db.all('SELECT id FROM packaging WHERE experiment_id=$e', { $e: experimentId }).map(r => r.id);
     // Randomised variant order (reduces order effects) — PRD section 7.
     for (let i = variants.length - 1; i > 0; i--) {
@@ -237,8 +239,8 @@ function registerIpc(ipcMain, db, app) {
     const code = 'P-' + crypto.randomBytes(3).toString('hex').toUpperCase();
     db.run('INSERT INTO participants (id,experiment_id,anonymous_code) VALUES ($id,$e,$c)', { $id: pid, $e: experimentId, $c: code });
     const sid = id();
-    db.run("INSERT INTO sessions (id,participant_id,variant_order,start_time,status) VALUES ($id,$p,$v,datetime('now'),'started')",
-      { $id: sid, $p: pid, $v: JSON.stringify(variants) });
+    db.run("INSERT INTO sessions (id,participant_id,variant_order,start_time,status,mode) VALUES ($id,$p,$v,datetime('now'),'started',$m)",
+      { $id: sid, $p: pid, $v: JSON.stringify(variants), $m: mode === 'simulated' ? 'simulated' : 'live' });
     return { sessionId: sid, participantId: pid, code, variantOrder: variants };
   });
   ipcMain.handle('session:consent', (_e, { participantId }) => {
@@ -292,7 +294,11 @@ function registerIpc(ipcMain, db, app) {
     );
   });
 
-  ipcMain.handle('analytics:experiment', (_e, eid) => {
+  ipcMain.handle('analytics:experiment', (_e, { eid, includeSimulated }) => {
+    // Simulated rehearsals are excluded from research aggregates by default:
+    // generated values are not measurements. The UI can include them on
+    // request, visibly labeled.
+    const modeFilter = includeSimulated ? '' : "AND COALESCE(s.mode,'live')='live'";
     const sessions = db.all(`
       SELECT s.*, pt.anonymous_code, pt.experiment_id FROM sessions s
       JOIN participants pt ON pt.id=s.participant_id WHERE pt.experiment_id=$e`, { $e: eid });
@@ -302,12 +308,15 @@ function registerIpc(ipcMain, db, app) {
       JOIN participants pt ON pt.id=s.participant_id
       JOIN tasks t ON t.id=r.task_id
       LEFT JOIN packaging p ON p.id=r.packaging_id
-      WHERE pt.experiment_id=$e`, { $e: eid });
+      WHERE pt.experiment_id=$e ${modeFilter}`, { $e: eid });
     const measStats = db.get(`
       SELECT COUNT(*) AS n, COUNT(pulse) AS pulse_n FROM measurements m
       JOIN sessions s ON s.id=m.session_id JOIN participants pt ON pt.id=s.participant_id
-      WHERE pt.experiment_id=$e`, { $e: eid });
-    return { sessions, responses, measStats };
+      WHERE pt.experiment_id=$e ${modeFilter}`, { $e: eid });
+    const simCount = db.get(`
+      SELECT COUNT(*) AS n FROM sessions s JOIN participants pt ON pt.id=s.participant_id
+      WHERE pt.experiment_id=$e AND COALESCE(s.mode,'live')='simulated'`, { $e: eid }).n;
+    return { sessions, responses, measStats, simCount };
   });
   ipcMain.handle('analytics:timeline', (_e, { sessionId, responseId }) => {
     return db.all(
@@ -315,7 +324,7 @@ function registerIpc(ipcMain, db, app) {
       responseId ? { $s: sessionId, $r: responseId } : { $s: sessionId });
   });
   ipcMain.handle('session:listForExperiment', (_e, eid) => db.all(`
-    SELECT s.id, s.status, s.start_time, s.end_time, pt.anonymous_code FROM sessions s
+    SELECT s.id, s.status, s.start_time, s.end_time, s.mode, pt.anonymous_code FROM sessions s
     JOIN participants pt ON pt.id=s.participant_id WHERE pt.experiment_id=$e ORDER BY s.start_time DESC`, { $e: eid }));
   ipcMain.handle('session:responses', (_e, sid) => db.all(`
     SELECT r.*, t.title AS task_title, p.variant_name FROM responses r

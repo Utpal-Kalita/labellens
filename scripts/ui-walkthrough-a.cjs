@@ -81,13 +81,13 @@ async function runSession(page, answers, tag) {
   await page.click('text=+ Allergen identification');
   await t(300);
   inputs = await page.$$('input:not([type=file])');
-  await inputs[2].fill('No peanuts');
+  await inputs[2].fill('May contain traces');
   await page.click('button:has-text("Add task")');
   await t(800);
   await page.screenshot({ path: SHOT('06-tasks-added') });
 
   // Session 1: correct answers
-  await runSession(page, { text: '18g', mc: 'No peanuts' }, 's1');
+  await runSession(page, { text: '18g', mc: 'May contain traces' }, 's1');
   await app.close();
   console.log('A done');
 })().catch(e => { console.error('A ERROR:', e.message.split('\n')[0]); process.exit(1); });

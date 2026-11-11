@@ -53,11 +53,14 @@ async function runSession(page, answers, tag) {
   await page.click('text=Cereal label study');
   await t(1200);
   // Session 2: incorrect answers
-  await runSession(page, { text: '25g', mc: 'May contain traces' }, 's2');
+  await runSession(page, { text: '25g', mc: 'No peanuts' }, 's2');
 
   await page.click('text=Analytics');
   await t(1500);
-  await page.screenshot({ path: SHOT('15-analytics-2-sessions') });
+  await page.screenshot({ path: SHOT('15-analytics-sim-excluded') });
+  const inc = await page.$('text=Include simulated');
+  if (inc) { await inc.click(); await t(1500); }
+  await page.screenshot({ path: SHOT('15b-analytics-sim-included') });
 
   // select first session in timeline
   const sel = await page.$$('select');

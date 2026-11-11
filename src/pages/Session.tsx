@@ -89,7 +89,7 @@ export default function SessionPage() {
 
   const beginSession = async () => {
     if (mode === 'live') localStorage.setItem('labellens.smartspectra.key', apiKey);
-    const s = await api.startSession(experimentId);
+    const s = await api.startSession(experimentId, mode);
     setSession(s);
     setPhase('welcome');
   };

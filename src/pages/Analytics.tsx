@@ -21,6 +21,8 @@ export default function Analytics() {
   const [sessions, setSessions] = useState<SessionRow[]>([]);
   const [responses, setResponses] = useState<ResponseRecord[]>([]);
   const [measStats, setMeasStats] = useState<any>({ n: 0, pulse_n: 0 });
+  const [simCount, setSimCount] = useState(0);
+  const [includeSim, setIncludeSim] = useState(false);
   const [selSession, setSelSession] = useState('');
   const [selResponse, setSelResponse] = useState('');
   const [sessionResponses, setSessionResponses] = useState<ResponseRecord[]>([]);
@@ -29,8 +31,8 @@ export default function Analytics() {
 
   useEffect(() => {
     api.getExperiment(id).then(d => setExp(d.experiment));
-    api.experimentAnalytics(id).then(d => { setSessions(d.sessions); setResponses(d.responses); setMeasStats(d.measStats); });
-  }, [id]);
+    api.experimentAnalytics(id, includeSim).then(d => { setSessions(d.sessions); setResponses(d.responses); setMeasStats(d.measStats); setSimCount(d.simCount || 0); });
+  }, [id, includeSim]);
 
   useEffect(() => {
     if (!selSession) { setSessionResponses([]); setTimeline([]); return; }
@@ -76,6 +78,19 @@ export default function Analytics() {
         <Link to={`/experiments/${id}`}><Button variant="ghost">Back to experiment</Button></Link>
       </div>
 
+      {simCount > 0 && (
+        <div className={`mb-4 rounded-xl border px-4 py-3 text-sm flex items-center justify-between gap-4 ${includeSim ? 'border-violet-300 bg-violet-50 text-violet-800' : 'border-amber-300 bg-amber-50 text-amber-800'}`}>
+          <span>
+            {includeSim
+              ? <><b>SIMULATED data included:</b> {simCount} rehearsal session(s) with generated values, not measurements, are part of every number on this page.</>
+              : <>{simCount} simulated rehearsal session(s) excluded from these aggregates — generated values are not measurements.</>}
+          </span>
+          <label className="flex items-center gap-2 text-xs whitespace-nowrap cursor-pointer">
+            <input type="checkbox" checked={includeSim} onChange={e => setIncludeSim(e.target.checked)} />
+            Include simulated (labeled)
+          </label>
+        </div>
+      )}
       <div className="grid grid-cols-4 gap-4 mb-8">
         <Stat label="Sessions" value={String(sessions.length)} hint={`${completed.length} completed`} />
         <Stat label="Avg completion" value={fmtMs(mean(responses.map(r => r.completion_time_ms).filter((x): x is number => x !== null)))} />
@@ -99,6 +114,10 @@ export default function Analytics() {
             </tbody>
           </table>
         ) : <p className="text-sm text-slate-500">No responses yet. Run a participant session to compare designs.</p>}
+        <p className="mt-3 text-xs text-slate-400">
+          Prototype limitation: each participant sees every variant with identical answer keys. Variant order is randomized per session,
+          but learning carryover between variants is not counterbalanced. Treat layout comparisons as exploratory, not proof that one design is better.
+        </p>
       </Card>
 
       <h2 className="font-semibold text-primary mb-3">Physiological timeline</h2>
@@ -149,10 +168,10 @@ export default function Analytics() {
                 <tr key={s.id}>
                   <td className="py-2">{s.anonymous_code}</td>
                   <td className="py-2 text-slate-500">{s.start_time}</td>
-                  <td className="py-2"><Badge tone={s.status === 'completed' ? 'good' : 'neutral'}>{s.status}</Badge></td>
+                  <td className="py-2"><Badge tone={s.status === 'completed' ? 'good' : 'neutral'}>{s.status}</Badge>{(s as any).mode === 'simulated' && <> <Badge tone="sim">SIMULATED</Badge></>}</td>
                   <td className="py-2 text-right">
                     <button className="text-xs text-red-500 hover:underline"
-                      onClick={async () => { if (confirm(`Delete all data for ${s.anonymous_code}? This cannot be undone.`)) { await api.deleteSessionData(s.id); if (selSession === s.id) { setSelSession(''); setSelResponse(''); setTimeline([]); setBaseline(null); } const d = await api.experimentAnalytics(id); setSessions(d.sessions); setResponses(d.responses); setMeasStats(d.measStats); } }}>
+                      onClick={async () => { if (confirm(`Delete all data for ${s.anonymous_code}? This cannot be undone.`)) { await api.deleteSessionData(s.id); if (selSession === s.id) { setSelSession(''); setSelResponse(''); setTimeline([]); setBaseline(null); } const d = await api.experimentAnalytics(id, includeSim); setSessions(d.sessions); setResponses(d.responses); setMeasStats(d.measStats); } }}>
                       Delete data
                     </button>
                   </td>

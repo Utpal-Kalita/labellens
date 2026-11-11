@@ -18,7 +18,7 @@ contextBridge.exposeInMainWorld('labellens', {
   addTask: (t) => ipcRenderer.invoke('task:add', t),
   deleteTask: (id) => ipcRenderer.invoke('task:delete', id),
 
-  startSession: (args) => ipcRenderer.invoke('session:start', args),
+  startSession: (experimentId, mode) => ipcRenderer.invoke('session:start', { experimentId, mode }),
   recordConsent: (args) => ipcRenderer.invoke('session:consent', args),
   completeSession: (args) => ipcRenderer.invoke('session:complete', args),
   abandonSession: (args) => ipcRenderer.invoke('session:abandon', args),
@@ -29,7 +29,7 @@ contextBridge.exposeInMainWorld('labellens', {
   recordBaseline: (b) => ipcRenderer.invoke('baseline:record', b),
   getBaseline: (sessionId) => ipcRenderer.invoke('baseline:get', sessionId),
 
-  experimentAnalytics: (id) => ipcRenderer.invoke('analytics:experiment', id),
+  experimentAnalytics: (args) => ipcRenderer.invoke('analytics:experiment', args),
   sessionTimeline: (args) => ipcRenderer.invoke('analytics:timeline', args),
   listSessions: (experimentId) => ipcRenderer.invoke('session:listForExperiment', experimentId),
   sessionResponses: (sessionId) => ipcRenderer.invoke('session:responses', sessionId),
