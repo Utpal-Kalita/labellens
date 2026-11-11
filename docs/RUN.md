@@ -20,9 +20,9 @@ binaries for these platforms only:
   with wine (Linux) or natively on Windows. The build here produced
   `LabelLens-Setup-<version>.zip` instead: unzip anywhere and run
   `LabelLens.exe`.
-- The installer is unsigned. Windows SmartScreen will show a
-  "Windows protected your PC" warning on first run; click "More info" then
-  "Run anyway".
+- The binaries are unsigned, so Windows may show a SmartScreen
+  reputation warning on first run. That is expected for an unsigned app;
+  only run builds you got from a source you trust.
 
 ### Linux
 - `LabelLens-<version>.AppImage`: make it executable (`chmod +x`) and run it.

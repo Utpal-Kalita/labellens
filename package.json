@@ -58,13 +58,23 @@
       "target": [
         "AppImage"
       ],
-      "category": "Utility"
+      "category": "Utility",
+      "files": [
+        "!node_modules/@smartspectra/node-sdk-darwin-arm64/**",
+        "!node_modules/@smartspectra/node-sdk-win32-x64/**"
+      ]
     },
     "win": {
       "target": [
         "nsis"
       ],
-      "artifactName": "LabelLens-Setup-${version}.${ext}"
+      "artifactName": "LabelLens-Setup-${version}.${ext}",
+      "signAndEditExecutable": false,
+      "files": [
+        "!node_modules/@smartspectra/node-sdk-darwin-arm64/**",
+        "!node_modules/@smartspectra/node-sdk-linux-x64/**",
+        "!node_modules/@smartspectra/node-sdk-linux-arm64/**"
+      ]
     },
     "nsis": {
       "oneClick": false,
