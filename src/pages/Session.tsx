@@ -45,6 +45,8 @@ export default function SessionPage() {
   const responseIdRef = useRef<string | null>(null);
   const baselinePulses = useRef<number[]>([]);
   const flushTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const phaseRef = useRef(phase);
+  useEffect(() => { phaseRef.current = phase; }, [phase]);
 
   useEffect(() => {
     api.getExperiment(experimentId).then(async d => {
@@ -62,14 +64,14 @@ export default function SessionPage() {
     if (!session || !bufferRef.current.length) return;
     const rows = bufferRef.current.splice(0, bufferRef.current.length);
     await api.recordMeasurements(session.sessionId, responseIdRef.current,
-      phase === 'baseline' ? 'baseline' : 'task', mode === 'live' ? 'live' : 'simulated', rows);
+      phaseRef.current === 'baseline' ? 'baseline' : 'task', mode === 'live' ? 'live' : 'simulated', rows);
   };
 
   const startSource = async (kind: 'live' | 'simulated') => {
     const events = {
       onMeasurement: (m: Measurement) => {
         bufferRef.current.push(m);
-        if (phase === 'baseline' && m.pulse !== null) baselinePulses.current.push(m.pulse);
+        if (phaseRef.current === 'baseline' && m.pulse !== null) baselinePulses.current.push(m.pulse);
       },
       onValidation: (code: number, label: string, hint: string, quality: 'good' | 'poor') => setValidation({ code, label, hint, quality }),
       onStatus: (s: any, detail?: string) => { setStatus(s); setStatusDetail(detail || ''); },

@@ -176,13 +176,13 @@ function registerIpc(ipcMain, db, app) {
     for (const row of db.all('SELECT image_path FROM packaging WHERE experiment_id=$id', { $id: eid })) {
       if (row.image_path && fs.existsSync(row.image_path)) fs.unlinkSync(row.image_path);
     }
-    const sessionIds = db.all('SELECT id FROM sessions WHERE experiment_id=$id', { $id: eid }).map(r => r.id);
+    const sessionIds = db.all('SELECT s.id AS id FROM sessions s JOIN participants pt ON pt.id = s.participant_id WHERE pt.experiment_id=$id', { $id: eid }).map(r => r.id);
     for (const sid of sessionIds) {
       db.run('DELETE FROM measurements WHERE session_id=$id', { $id: sid });
       db.run('DELETE FROM responses WHERE session_id=$id', { $id: sid });
       db.run('DELETE FROM baselines WHERE session_id=$id', { $id: sid });
     }
-    db.run('DELETE FROM sessions WHERE experiment_id=$id', { $id: eid });
+    db.run('DELETE FROM sessions WHERE participant_id IN (SELECT id FROM participants WHERE experiment_id=$id)', { $id: eid });
     db.run('DELETE FROM participants WHERE id NOT IN (SELECT participant_id FROM sessions)');
     db.run('DELETE FROM tasks WHERE experiment_id=$id', { $id: eid });
     db.run('DELETE FROM packaging WHERE experiment_id=$id', { $id: eid });

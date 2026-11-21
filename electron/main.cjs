@@ -25,6 +25,10 @@ async function createWindow() {
     },
   });
 
+  // Required per-window main-side wiring for the SmartSpectra renderer bridge:
+  // receives the MessagePort the preload posts and owns the native SDK instance.
+  require('@smartspectra/node-sdk/main').bindSmartSpectraIpc(win);
+
   // Camera permission: grant only to our own app pages, deny everything else.
   session.defaultSession.setPermissionRequestHandler((wc, permission, callback, details) => {
     const url = (details && details.requestingUrl) || (wc && wc.getURL()) || '';
