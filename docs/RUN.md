@@ -39,8 +39,8 @@ binaries for these platforms only:
 1. The app asks for a Presage SmartSpectra API key (Settings). Get one from
    the Presage developer portal; the free tier works.
 2. Camera access is requested per session, after the explicit consent screen.
-3. All research data stays on the machine in a local SQLite database. Camera
-   frames are processed on-device by the SmartSpectra SDK and never recorded.
+3. Read and agree to the full SDK data-sharing disclosure before a live session. Local app records are stored in SQLite, but Presage's current SDK policy says derived measurements are automatically sent for cloud AI Insights, with Anthropic as its AI processor. Optional telemetry being off does not disable that processing. Presage says camera frames remain on the computer running the app; LabelLens itself does not record or upload participant video. Native SDK network behavior has not been independently verified.
+4. Local records have no automatic expiry. Session deletion affects local app records, not provider-held records or backups. Review the SDK policy's retention and deletion sections: https://presagetech.com/legal/privacy-policy/ . No remote-camera forwarding is included.
 
 ## Development
 

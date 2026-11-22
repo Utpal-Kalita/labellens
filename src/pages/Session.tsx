@@ -233,19 +233,25 @@ export default function SessionPage() {
                 <li>Facial-expression classifications and blinking</li>
                 <li>How long each task takes, your answers, and your difficulty ratings</li>
               </ul>
-              <p className="font-medium">How your data is handled:</p>
+              <p className="font-medium">Camera and local records:</p>
               <ul className="list-disc list-inside space-y-1">
-                <li>Your camera frames are processed on this computer by the SmartSpectra software. LabelLens never records, saves, or uploads video or photos of your face.</li>
-                <li>Only the resulting measurements (numbers such as pulse rate), your answers, and timings are saved, in a local database on this computer.</li>
-                <li>SmartSpectra contacts Presage's servers to verify its license key. Its optional usage telemetry is turned off in this app, so it does not send session summaries or device diagnostics.</li>
+                <li>Presage says its SDK processes camera frames on the computer running this app and does not send face images or video to Presage. LabelLens itself does not record or upload participant video, face photos or audio. We have not independently verified all native SDK network traffic.</li>
+                <li>LabelLens stores derived measurements, answers, timings and consent in a local database. There is no automatic expiry. You can stop and request deletion of your local session records.</li>
               </ul>
-              <p>These measurements are observational research data. They are not medical readings and are never used to diagnose your emotions or health. You can stop at any time, and you can ask for your session data to be deleted.</p>
+              <p className="font-medium">SDK sharing and AI processing:</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Presage's current SDK privacy policy says derived measurements are automatically sent to Presage for AI-generated Insights, with Anthropic as its AI processor. The policy says this processing cannot currently be turned off.</li>
+                <li>Optional SDK telemetry is off in LabelLens. That does not disable Insights, authentication or model delivery. Although LabelLens does not request on-demand Insights, we cannot confirm that the native SDK sends no measurements.</li>
+                <li>Deleting data in LabelLens does not delete provider-held data. Presage says it keeps Insights requests and responses while the developer account is active and for up to 60 days after closure; backups may last up to 90 days. Its policy describes other retention exceptions and separate deletion requests.</li>
+              </ul>
+              <p>Read Presage's SDK privacy policy before agreeing: <span className="font-mono text-xs break-all">https://presagetech.com/legal/privacy-policy/</span> (SDK sections 4, 7, 10 and 11).</p>
+              <p>These are observational research measurements, not medical readings or proof of emotions. Agree only if you accept both the local research records and the SDK processing described above. No remote-camera forwarding is part of this session.</p>
             </div>
           ) : (
             <p className="text-sm text-slate-600 mb-4">This is a simulated rehearsal. No camera is used and no real measurements are taken. Values are generated placeholders for practicing the workflow.</p>
           )}
           <div className="flex gap-3">
-            <Button variant="accent" onClick={giveConsent}>{mode === 'live' ? 'I consent — turn on the camera' : 'Continue'}</Button>
+            <Button variant="accent" onClick={giveConsent}>{mode === 'live' ? 'I agree to this data handling, turn on camera' : 'Continue'}</Button>
             <Button variant="ghost" onClick={abandon}>Decline</Button>
           </div>
         </Card>
